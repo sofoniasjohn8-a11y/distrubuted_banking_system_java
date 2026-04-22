@@ -17,8 +17,6 @@ public class BankManagerGUI {
     private static final Color CARD_BG     = new Color(245, 248, 255);
     private static final Font  UI_FONT     = new Font("Segoe UI", Font.PLAIN, 13);
 
-    private DatabaseManager dbManager = DatabaseManager.getInstance();
-
     public BankManagerGUI(BankManager bankManager, String username, String fullname) {
         this.bankManager = bankManager;
         this.username    = username;
@@ -106,12 +104,17 @@ public class BankManagerGUI {
         inputs.add(txtAmount);
         card.add(inputs, BorderLayout.NORTH);
 
-        // Check if user already has an account
-        boolean hasAccount = dbManager.userHasAccount(username);
+        // Check if user already has an account via RMI
+        boolean hasAccount = false;
+        String accountId = "";
+        try {
+            hasAccount = bankManager.userHasAccount(username);
+            if (hasAccount) accountId = bankManager.getAccountIdByUsername(username);
+        } catch (Exception ex) { /* ignore */ }
 
-        // If user has account, pre-fill account ID field
+        final String finalAccountId = accountId;
         if (hasAccount) {
-            txtAccountId.setText(dbManager.getAccountIdByUsername(username));
+            txtAccountId.setText(finalAccountId);
             txtAccountId.setEditable(false);
         }
 
@@ -128,7 +131,7 @@ public class BankManagerGUI {
         card.add(buttons, BorderLayout.CENTER);
 
         // User info footer inside card
-        String accountInfo = hasAccount ? "Account: " + dbManager.getAccountIdByUsername(username) : "No account yet";
+        String accountInfo = hasAccount ? "Account: " + finalAccountId : "No account yet";
         JLabel userInfo = new JLabel("Logged in as: " + username + "  |  " + accountInfo, SwingConstants.CENTER);
         userInfo.setFont(new Font("Segoe UI", Font.ITALIC, 11));
         userInfo.setForeground(new Color(120, 130, 160));

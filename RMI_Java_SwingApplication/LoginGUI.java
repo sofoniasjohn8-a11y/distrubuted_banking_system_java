@@ -4,14 +4,12 @@ import java.awt.*;
 public class LoginGUI {
     private JFrame frame;
     private BankManager bankManager;
-    private DatabaseManager dbManager;
 
     private static final Color PRIMARY     = new Color(30, 60, 114);
     private static final Color PRIMARY_END = new Color(42, 82, 152);
 
     public LoginGUI(BankManager bankManager) {
         this.bankManager = bankManager;
-        this.dbManager   = DatabaseManager.getInstance();
         initialize();
     }
 
@@ -87,13 +85,17 @@ public class LoginGUI {
                 JOptionPane.showMessageDialog(frame, "Please enter username and password.");
                 return;
             }
-            if (dbManager.authenticateUser(username, password)) {
-                String fullname = dbManager.getFullname(username);
-                frame.dispose();
-                SwingUtilities.invokeLater(() -> new BankManagerGUI(bankManager, username, fullname));
-            } else {
-                JOptionPane.showMessageDialog(frame, "Invalid username or password.", "Login Failed", JOptionPane.ERROR_MESSAGE);
-                passwordField.setText("");
+            try {
+                if (bankManager.authenticateUser(username, password)) {
+                    String fullname = bankManager.getFullname(username);
+                    frame.dispose();
+                    SwingUtilities.invokeLater(() -> new BankManagerGUI(bankManager, username, fullname));
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Invalid username or password.", "Login Failed", JOptionPane.ERROR_MESSAGE);
+                    passwordField.setText("");
+                }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, "Server error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -148,7 +150,7 @@ public class LoginGUI {
                 return;
             }
             try {
-                dbManager.registerUser(username, fullname, password);
+                bankManager.registerUser(username, fullname, password);
                 JOptionPane.showMessageDialog(frame, "Registration successful! Please login.");
                 fullnameField.setText(""); usernameField.setText("");
                 passwordField.setText(""); confirmField.setText("");

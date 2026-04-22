@@ -52,4 +52,33 @@ public class BankManagerImpl extends UnicastRemoteObject implements BankManager 
             throw new RemoteException("Error transferring funds: " + e.getMessage());
         }
     }
+
+    @Override
+    public boolean authenticateUser(String username, String password) throws RemoteException {
+        return dbManager.authenticateUser(username, password);
+    }
+
+    @Override
+    public void registerUser(String username, String fullname, String password) throws RemoteException {
+        try {
+            dbManager.registerUser(username, fullname, password);
+        } catch (Exception e) {
+            throw new RemoteException(e.getMessage());
+        }
+    }
+
+    @Override
+    public String getFullname(String username) throws RemoteException {
+        return dbManager.getFullname(username);
+    }
+
+    @Override
+    public boolean userHasAccount(String username) throws RemoteException {
+        return dbManager.userHasAccount(username);
+    }
+
+    @Override
+    public String getAccountIdByUsername(String username) throws RemoteException {
+        return dbManager.getAccountIdByUsername(username);
+    }
 }
